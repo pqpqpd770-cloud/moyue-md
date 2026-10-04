@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN" class="theme-light" data-face="sans">
+<head>
+<meta charset="utf-8">
+<title>印本风 starter</title>
+<link rel="stylesheet" href="ink-print-tokens.css"> <!-- 同目录的 token 文件 -->
+<style>
+  /* 只写骨架：颜色、字体、印章、动效全部来自 token 文件。
+     URL 上的 #dark / #serif 用来切主题和字体，方便截图对比。 */
+  #app { display: flex; flex-direction: column; height: 100%; }
+  #workspace { flex: 1 1 auto; display: flex; min-height: 0; }
+  #toc { flex: 0 0 var(--toc-w); border-right: 1px solid var(--rule); padding: 14px 10px; overflow: auto; }
+  .toc-head { font-size: 12px; color: var(--ink-3); padding: 0 8px 10px; }
+  .toc-item { display: flex; gap: 8px; padding: 5px 8px; border-left: 2px solid transparent;
+              border-radius: 0 3px 3px 0; color: var(--ink-2); font-size: 12.5px; cursor: pointer; }
+  .toc-item.title { font-weight: 600; color: var(--ink); }
+  .toc-item.active { color: var(--indigo); border-left-color: var(--indigo); background: var(--indigo-soft); }
+  #view { flex: 1 1 auto; overflow: auto; }
+  .tools { margin-left: auto; display: flex; gap: 2px; color: var(--ink-2); font-size: 12.5px; }
+  .tools span { padding: 5px 9px; border-radius: 3px; }
+  .tools .on { color: var(--ink); box-shadow: inset 0 -2px 0 var(--indigo); }
+  .wctl { display: flex; gap: 2px; margin-left: 6px; }
+  .wc { width: 38px; height: calc(var(--bar-h) - 8px); display: grid; place-items: center;
+        border: 0; background: none; border-radius: 3px; color: var(--ink-2); cursor: pointer; }
+  .wc:hover { background: var(--paper-2); color: var(--ink); }
+  .wc.close:hover { background: #c42b1c; color: #fff; }
+  .crumb-file { font-size: 13px; color: var(--ink); }
+</style>
+</head>
+<body>
+<div id="app">
+  <header data-ink-bar>
+    <span class="seal" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M6.4 13.2 V4.8 L12 13.6 L17.6 4.8 V13.2"/><path d="M7.4 17.4 L12 21 L16.6 17.4"/></svg>
+    </span>
+    <div id="crumb" style="display:flex;align-items:center;gap:6px">
+      <button class="crumb-file">排版规范.md <span class="crumb-sep">⌄</span></button>
+      <span class="crumb-sep">›</span>
+      <span id="crumb-sec">色与线的分工</span>
+    </div>
+    <div class="tools"><span>目录</span><span>查找</span><span>译</span><span>Aa</span><span>⋯</span></div>
+    <div class="wctl">
+      <button class="wc" aria-label="最小化"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1.5 6h9"/></svg></button>
+      <button class="wc" aria-label="最大化"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1.5" y="1.5" width="9" height="9" rx="1"/></svg></button>
+      <button class="wc close" aria-label="关闭"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1.8 1.8l8.4 8.4M10.2 1.8l-8.4 8.4"/></svg></button>
+    </div>
+  </header>
+  <div data-ink-progress style="--seen:26%"></div>
+
+  <div id="workspace" data-ink-workspace>
+    <aside id="toc">
+      <div class="toc-head">目录</div>
+      <div class="toc-item title">印本风是什么</div>
+      <div class="toc-item active">色与线的分工</div>
+      <div class="toc-item">正文度量</div>
+      <div class="toc-item">表格与代码</div>
+    </aside>
+    <main id="view">
+      <article data-ink-page>
+        <div data-ink-body>
+          <h1>印本风是什么</h1>
+          <p>整个窗口是一张纸，只有印章是饱和色。结构靠留白和 1px 细线表达，不用阴影和卡片；字是主角。</p>
+          <blockquote><p>纸色不要米黄，强调色不超过三种，动效只在用户动作之后发生。</p></blockquote>
+
+          <h2>色与线的分工</h2>
+          <p>四种颜料各干一件事：<a href="#">花青管链接</a>、朱砂只给印章、藤黄只做标记、墨写字。</p>
+          <table>
+            <thead><tr><th>颜料</th><th>浅色</th><th>深色</th><th>用途</th></tr></thead>
+            <tbody>
+              <tr><td>纸</td><td><code>#fafaf8</code></td><td><code>#1b1d22</code></td><td>全窗口唯一底色</td></tr>
+              <tr><td>花青</td><td><code>#2d4e8c</code></td><td><code>#93abdd</code></td><td>链接、选中、进度</td></tr>
+              <tr><td>朱砂</td><td><code>#b5372a</code></td><td><code>#c4493a</code></td><td>只给印章</td></tr>
+            </tbody>
+          </table>
+
+          <h2>正文度量</h2>
+          <p>正文 17px、行高 1.8、一行约 36 个汉字；标题用黑体真粗体，宋体模式下加粗换黑体。</p>
+          <div class="code">
+            <pre><code>--base: 17px;
+line-height: 1.8;
+max-width: 36em;   /* 版心 */</code></pre>
+            <span class="lang">css</span>
+            <button class="copy">复制</button>
+          </div>
+        </div>
+      </article>
+    </main>
+  </div>
+</div>
+<script>
+  const hash = location.hash;
+  if (hash.includes('dark')) document.documentElement.className = 'theme-dark';
+  if (hash.includes('serif')) document.documentElement.dataset.face = 'serif';
+</script>
+</body>
+</html>

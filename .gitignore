@@ -1,0 +1,14 @@
+/target
+
+# 开发过程中的临时产物（截图、草稿、验证脚本输出）
+/work
+
+# Windows
+Thumbs.db
+Desktop.ini
+*.pdb
+
+# 编辑器
+.vscode/
+.idea/
+*.swp

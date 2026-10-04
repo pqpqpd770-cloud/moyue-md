@@ -1,0 +1,40 @@
+[package]
+name = "moyue_md"
+version = "0.1.0"
+edition = "2024"
+description = "墨阅 - 轻量 Markdown 预览器"
+
+[[bin]]
+name = "MoyueMD"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[dependencies]
+base64 = "0.23.1"
+encoding_rs = "0.8.42"
+open = "5.4.4"
+windows = { version = "0.62", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_Graphics_Dwm",
+    "Win32_Networking_WinHttp",
+    "Win32_System_DataExchange",
+    "Win32_System_Memory",
+    "Win32_System_Registry",
+    "Win32_Security",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+] }
+raw-window-handle = "0.6"
+pulldown-cmark = "0.13.4"
+rfd = "0.17.2"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+tao = "0.37.1"
+wry = "0.57.0"

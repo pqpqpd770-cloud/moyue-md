@@ -1,0 +1,246 @@
+/*
+ * 印本风 (Ink & Print) — token 与基础排版
+ * 用法：主题类挂 <html>（class="theme-light" / "theme-dark"），
+ * 正文容器用 [data-ink-body]，页面用 [data-ink-page]。字体模式挂在 html[data-face="serif"]。
+ * 全窗口同一个 --paper 底色：不要引入第二种"外壳色"。
+ */
+
+:root {
+  --ui: "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei",
+        "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC", system-ui, sans-serif;
+  --sans: "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei", "PingFang SC",
+          "Noto Sans CJK SC", "Noto Sans SC", sans-serif;
+  --serif: "Source Han Serif SC", "Source Han Serif CN", "Noto Serif CJK SC", "Noto Serif SC",
+           "Songti SC", Georgia, "STSong", "SimSun", serif;
+  --kai: Georgia, "KaiTi", "楷体", "STKaiti", "Kaiti SC", "AR PL UKai CN", serif;
+  --mono: "Cascadia Mono", "Cascadia Code", Consolas, "SF Mono", Menlo, "DejaVu Sans Mono",
+          "Microsoft YaHei", "Noto Sans CJK SC", monospace;
+
+  --read: var(--sans);        /* 正文字体；html[data-face=serif] 时换成 --serif */
+  --head: var(--sans);        /* 标题一律黑体：真粗体，不用伪粗 */
+  --lh: 1.8;
+
+  --bar-h: 40px;
+  --toc-w: 236px;
+  --panel-w: 380px;
+  --base: 17px;
+  --ease: cubic-bezier(.22, .8, .3, 1);
+  --zoom-anim: .18s;          /* 字号缩放过渡；长文档由脚本改成 0s */
+}
+
+html[data-face="serif"] { --read: var(--serif); --lh: 1.9; }
+
+html.theme-light {
+  --paper: #fafaf8;
+  --paper-2: #f0f0ed;
+  --paper-3: #e6e6e2;
+  --code-bg: #f2f2ef;
+  --ink: #1c1f25;
+  --ink-2: #4b5059;
+  --ink-3: #6b7079;
+  --rule: #e3e3de;
+  --rule-2: #cfcfc9;
+  --indigo: #2d4e8c;          /* 花青：链接、选中、焦点、进度 */
+  --indigo-soft: rgba(45, 78, 140, .09);
+  --indigo-line: rgba(45, 78, 140, .32);
+  --cinnabar: #b5372a;        /* 朱砂：错误 */
+  --seal: #b5372a;            /* 朱砂：只给印章 */
+  --seal-ink: #fbf7f2;
+  --hl: rgba(232, 168, 16, .28);        /* 藤黄：只给查找命中与 mark */
+  --hl-current: rgba(232, 150, 0, .6);
+  --tok-kw: #2d4e8c;
+  --tok-fn: #3a5a98;
+  --tok-str: #2c6a4e;
+  --tok-num: #94551f;
+  --tok-typ: #94551f;
+  --tok-pp: #b5372a;
+  --shadow: 0 12px 32px -10px rgba(22, 26, 34, .22), 0 2px 6px -2px rgba(22, 26, 34, .08);
+  --scrim: rgba(28, 31, 37, .32);
+  color-scheme: light;
+}
+
+html.theme-dark {
+  --paper: #1b1d22;
+  --paper-2: #24272d;
+  --paper-3: #2e3138;
+  --code-bg: #212429;
+  --ink: #d8dbe0;
+  --ink-2: #a2a7af;
+  --ink-3: #878d97;
+  --rule: #2c2f36;
+  --rule-2: #3c4048;
+  --indigo: #93abdd;
+  --indigo-soft: rgba(147, 171, 221, .12);
+  --indigo-line: rgba(147, 171, 221, .38);
+  --cinnabar: #e06a57;        /* 深色下单独提亮，否则糊在暗底上 */
+  --seal: #c4493a;
+  --seal-ink: #fbefe9;
+  --hl: rgba(232, 176, 30, .24);
+  --hl-current: rgba(232, 176, 30, .52);
+  --tok-kw: #93abdd;
+  --tok-fn: #b9c8e8;
+  --tok-str: #8fc4a6;
+  --tok-num: #d9a66f;
+  --tok-typ: #d9a66f;
+  --tok-pp: #e48d7d;
+  --shadow: 0 14px 36px -10px rgba(0, 0, 0, .6), 0 2px 6px -2px rgba(0, 0, 0, .4);
+  --scrim: rgba(8, 9, 12, .55);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--ui);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color .2s ease, color .2s ease;
+}
+
+button, select, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--indigo); outline-offset: 1px; }
+
+/* ------------------------------------------------------------------ 印章 */
+
+.seal {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;          /* 唯一允许比 3px 大的小元素：印章 */
+  background: var(--seal);
+}
+.seal svg {
+  width: 15px; height: 15px;
+  fill: none; stroke: var(--seal-ink); stroke-width: 2.1;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* ------------------------------------------------------------ 标题栏与书眉 */
+
+[data-ink-bar] {
+  display: flex; align-items: center; gap: 10px;
+  height: var(--bar-h); padding: 0 8px 0 14px;
+  border-bottom: 1px solid var(--rule);
+  user-select: none;
+}
+.crumb-file { display: inline-flex; align-items: center; gap: 4px; border: 0; background: none; cursor: pointer; }
+.crumb-sep { opacity: .45; }
+#crumb-sec { color: var(--ink-2); font-size: 12.5px; }
+
+/* 阅读进度就是标题栏的下边线 */
+[data-ink-progress] {
+  height: 2px; margin-top: -1px;
+  background: linear-gradient(to right, var(--indigo) 0 var(--seen, 0%), var(--rule) var(--seen, 0%) 100%);
+}
+
+/* ------------------------------------------------------------------ 版心 */
+
+[data-ink-page] { max-width: 36em; margin: 0 auto; padding: 32px 40px 120px; }
+
+[data-ink-body] {
+  font-family: var(--read);
+  font-size: var(--base);
+  line-height: var(--lh);
+  color: var(--ink);
+  text-autospace: normal;      /* 中西文自动留白：新版 WebView2 生效，旧版忽略 */
+  overflow-wrap: break-word;
+  transition: font-size var(--zoom-anim) var(--ease);
+}
+
+[data-ink-body] h1,
+[data-ink-body] h2,
+[data-ink-body] h3 {
+  font-family: var(--head);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ink);
+}
+[data-ink-body] h1 { font-size: 1.7em; margin: 2em 0 .8em; }
+[data-ink-body] h2 { font-size: 1.3em; margin: 1.6em 0 .6em; }
+[data-ink-body] h3 { font-size: 1.1em; margin: 1.4em 0 .5em; }
+[data-ink-body] p { margin: 0 0 .9em; }
+
+/* 宋体模式下加粗换黑体：中文书籍"宋体正文、黑体强调"的惯例，也避开宋体伪粗 */
+html[data-face="serif"] [data-ink-body] strong,
+html[data-face="serif"] [data-ink-body] b,
+html[data-face="serif"] [data-ink-body] th {
+  font-family: var(--sans);
+  font-weight: 700;
+}
+
+[data-ink-body] a { color: var(--indigo); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+[data-ink-body] blockquote {
+  margin: 1.2em 0; padding: .1em 0 .1em 1.1em;
+  border-left: 2px solid var(--rule-2);
+  font-family: var(--kai); color: var(--ink-2);      /* 引文用楷体 */
+}
+[data-ink-body] hr {
+  border: 0; margin: 2em auto; width: 4em; height: 1px; background: var(--rule-2);   /* 换场短线 */
+}
+[data-ink-body] code {
+  font-family: var(--mono); font-size: .88em;
+  padding: .08em .34em; background: var(--paper-2);
+  border: 0; border-radius: 3px;
+}
+[data-ink-body] mark { background: var(--hl); color: inherit; }
+
+/* ---------------------------------------------------------------- 三线表 */
+
+[data-ink-body] table { width: 100%; margin: 1.4em 0; border-collapse: collapse; font-size: .94em; }
+[data-ink-body] thead th {
+  padding: 7px 10px; text-align: left; font-weight: 700;
+  border-top: 1.5px solid var(--rule-2);
+  border-bottom: 1.5px solid var(--rule-2);
+}
+[data-ink-body] tbody td { padding: 7px 10px; border-bottom: 1px solid var(--rule); }
+[data-ink-body] tbody tr:last-child td { border-bottom: 1.5px solid var(--rule-2); }
+[data-ink-body] th, [data-ink-body] td { overflow-wrap: break-word; }
+[data-ink-body] td.tight { overflow-wrap: anywhere; }   /* 含 ≥15 字符拉丁串的单元格 */
+
+/* ---------------------------------------------------- 代码块（无标题栏） */
+
+.code { position: relative; margin: 1.4em 0; padding: 2px 0; background: var(--code-bg); border-radius: 6px; }
+.code pre { margin: 0; padding: 12px 14px; }
+.code code {
+  font-family: var(--mono); font-size: .86em; line-height: 1.7;
+  white-space: break-spaces;    /* 折行，且成串空格不悬挂到盒外被裁掉 */
+  overflow-wrap: anywhere;
+}
+.code .lang, .code .copy {
+  position: absolute; top: 4px; right: 8px;
+  font-family: var(--ui); font-size: 11.5px; color: var(--ink-3);
+  transition: opacity .14s var(--ease);
+}
+.code .copy { opacity: 0; padding: 2px 8px; background: var(--paper-2);
+              border: 0; border-radius: 3px; color: var(--ink-2); cursor: pointer; }
+.code:hover .lang { opacity: 0; }
+.code:hover .copy { opacity: 1; }
+.code .copy:hover { background: var(--paper-3); color: var(--ink); }
+
+.tok-kw { color: var(--tok-kw); font-weight: 600; }
+.tok-fn { color: var(--tok-fn); }
+.tok-str { color: var(--tok-str); }
+.tok-num, .tok-typ { color: var(--tok-num); }
+.tok-pp { color: var(--tok-pp); }
+.tok-com { color: var(--ink-3); font-style: italic; }
+
+/* ------------------------------------------------------------------ 动效 */
+
+@keyframes paper-in { from { opacity: 0; transform: translateY(14px) scale(.994); } to { opacity: 1; transform: none; } }
+@keyframes stamp-in {
+  0%   { opacity: 0; transform: scale(1.6) rotate(-7deg); }
+  55%  { opacity: 1; transform: scale(.93) rotate(1.5deg); }
+  78%  { transform: scale(1.03) rotate(-.6deg); }
+  100% { opacity: 1; transform: none; }
+}
+[data-ink-workspace] { animation: paper-in .46s cubic-bezier(.16, 1.02, .3, 1) both; }
+[data-ink-bar] .seal { animation: stamp-in .52s cubic-bezier(.3, 1.45, .5, 1) both; animation-delay: .07s; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

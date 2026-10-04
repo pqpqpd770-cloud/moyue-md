@@ -1,0 +1,5 @@
+interface:
+  display_name: "印本风界面"
+  short_description: "纸墨印本风的界面设计语言：宋体正文、界行分割、无阴影、多色墨"
+  brand_color: "#96683A"
+  default_prompt: "Use $ink-print-ui to design this interface in the ink-and-print editorial style."

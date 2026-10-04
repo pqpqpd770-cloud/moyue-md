@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-CN" class="theme-dark" data-face="sans">
+<head>
+<meta charset="utf-8">
+<title>墨阅</title>
+<style>/*__CSS__*/</style>
+</head>
+<body class="boot">
+<div id="app">
+  <header id="titlebar">
+    <span class="seal" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <path d="M6.4 13.2 V4.8 L12 13.6 L17.6 4.8 V13.2"/>
+        <path d="M7.4 17.4 L12 21 L16.6 17.4"/>
+      </svg>
+    </span>
+
+    <!-- 书眉：文件名 + 正在读的那一节 -->
+    <div id="crumb">
+      <button class="crumb-file" id="t-file" aria-haspopup="menu" aria-label="文件信息与最近打开">
+        <span id="chip-name"></span>
+        <svg class="caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.6l3 3 3-3"/></svg>
+      </button>
+      <svg class="crumb-sep" viewBox="0 0 12 12" aria-hidden="true"><path d="M4.6 2.6 8 6l-3.4 3.4"/></svg>
+      <span id="crumb-sec"></span>
+    </div>
+
+    <div class="grow"></div>
+
+    <nav class="tools" aria-label="工具">
+      <button class="tb doc-only on" id="t-toc" data-tip="目录 Ctrl+B" aria-label="目录" aria-pressed="true">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M9 12h11M9 18h11"/><path d="M4.6 12h.8M4.6 18h.8"/></svg>
+      </button>
+      <button class="tb doc-only" id="t-find" data-tip="查找 Ctrl+F" aria-label="查找">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.2"/><path d="M15.6 15.6L20.4 20.4"/></svg>
+      </button>
+      <button class="tb doc-only" id="t-translate" data-tip="翻译 Ctrl+T" aria-label="翻译">
+        <svg viewBox="0 0 24 24"><path d="M4.6 6.4h8.2M8.7 4.2v2.2M6.2 6.4c0 4.3 2.7 7.5 6.6 9.1"/><path d="M13.4 19.6l3.5-8.4 3.5 8.4M14.7 16.9h4.4"/></svg>
+      </button>
+      <button class="tb" id="t-prefs" data-tip="字号、字体与深浅色" aria-label="阅读设置" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24"><path d="M3.4 19 8.9 5h.2l5.5 14M5.6 14.2h6.8"/><circle cx="18.3" cy="16.3" r="2.7"/><path d="M21 13.1V19"/></svg>
+      </button>
+      <button class="tb" id="t-more" data-tip="更多" aria-label="更多" aria-haspopup="menu">
+        <svg viewBox="0 0 24 24" class="solid"><circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/></svg>
+      </button>
+    </nav>
+
+    <div class="wctl">
+      <button class="wc" id="w-min" title="最小化" aria-label="最小化">
+        <svg viewBox="0 0 12 12"><path d="M1.5 6h9"/></svg>
+      </button>
+      <button class="wc" id="w-max" title="最大化" aria-label="最大化">
+        <svg class="i-max" viewBox="0 0 12 12"><rect x="1.5" y="1.5" width="9" height="9" rx="1"/></svg>
+        <svg class="i-restore hidden" viewBox="0 0 12 12"><rect x="1.5" y="3.5" width="7" height="7" rx="1"/><path d="M3.5 3.5V2.5a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-1"/></svg>
+      </button>
+      <button class="wc close" id="w-close" title="关闭" aria-label="关闭">
+        <svg viewBox="0 0 12 12"><path d="M1.8 1.8l8.4 8.4M10.2 1.8l-8.4 8.4"/></svg>
+      </button>
+    </div>
+    <div id="readline" aria-hidden="true"></div>
+  </header>
+
+  <div id="workspace">
+    <aside id="toc" aria-label="目录">
+      <div class="toc-head">
+        <span>目录</span>
+        <button class="ghost" id="toc-collapse" title="收起目录" aria-label="收起目录">
+          <svg viewBox="0 0 12 12"><path d="M7.4 2.6 4 6l3.4 3.4"/></svg>
+        </button>
+      </div>
+      <nav id="toc-list"></nav>
+      <p id="toc-empty">这份文档里没有标题</p>
+    </aside>
+
+    <div id="stage">
+      <div id="finder" class="hidden" role="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.2"/><path d="M15.6 15.6L20.4 20.4"/></svg>
+        <input id="find-input" type="text" placeholder="在文中查找" spellcheck="false" autocomplete="off" aria-label="查找内容">
+        <span id="find-count">0/0</span>
+        <button class="ghost" id="find-prev" title="上一个 Shift+Enter" aria-label="上一个">
+          <svg viewBox="0 0 12 12"><path d="M2.6 7.6 6 4.2l3.4 3.4"/></svg>
+        </button>
+        <button class="ghost" id="find-next" title="下一个 Enter" aria-label="下一个">
+          <svg viewBox="0 0 12 12"><path d="M2.6 4.4 6 7.8l3.4-3.4"/></svg>
+        </button>
+        <button class="ghost" id="find-close" title="关闭 Esc" aria-label="关闭查找">
+          <svg viewBox="0 0 12 12"><path d="M3 3l6 6M9 3 3 9"/></svg>
+        </button>
+      </div>
+
+      <main id="view">
+        <article id="page">
+          <div id="doc"></div>
+
+          <section id="welcome">
+            <span class="seal big" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M6.4 13.2 V4.8 L12 13.6 L17.6 4.8 V13.2"/>
+                <path d="M7.4 17.4 L12 21 L16.6 17.4"/>
+              </svg>
+            </span>
+            <h1>墨阅</h1>
+            <p class="invite">把 Markdown 文件拖进窗口，或者从电脑里选一个。</p>
+            <div class="welcome-actions">
+              <button class="btn primary" id="w-open">打开文件</button>
+              <span class="hint"><kbd>Ctrl</kbd><kbd>O</kbd></span>
+            </div>
+            <div id="recent-wrap" class="recent hidden">
+              <div class="recent-head">
+                <span>最近打开</span>
+                <button class="linkbtn" id="recent-clear">清空</button>
+              </div>
+              <ul id="recent-list"></ul>
+            </div>
+          </section>
+        </article>
+      </main>
+    </div>
+
+    <aside id="panel" aria-label="译文">
+      <header>
+        <span id="panel-title">译文</span>
+        <label class="select">
+          <select id="panel-lang" aria-label="翻译成">
+            <option value="auto">自动</option>
+            <option value="zh-CN">简体中文</option>
+            <option value="zh-TW">繁體中文</option>
+            <option value="en">English</option>
+            <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
+            <option value="ru">Русский</option>
+            <option value="de">Deutsch</option>
+            <option value="fr">Français</option>
+            <option value="es">Español</option>
+            <option value="it">Italiano</option>
+          </select>
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.6l3 3 3-3"/></svg>
+        </label>
+        <span class="grow"></span>
+        <button class="toggle" id="panel-comments" aria-pressed="true" title="同时翻译代码块里的注释">注释</button>
+        <button class="ghost text" id="panel-copy" title="复制译文的 Markdown">复制</button>
+        <button class="ghost" id="panel-close" title="关闭 Esc" aria-label="关闭译文">
+          <svg viewBox="0 0 12 12"><path d="M3 3l6 6M9 3 3 9"/></svg>
+        </button>
+      </header>
+      <div id="panel-body">
+        <div id="panel-state" class="state hidden">
+          <span class="spinner" aria-hidden="true"></span>
+          <span id="panel-state-text"></span>
+        </div>
+        <div class="md-body hidden" id="panel-md"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div id="menu" class="popover hidden" role="menu"></div>
+
+<div id="prefs" class="popover hidden" role="dialog" aria-label="阅读设置">
+  <div class="pref">
+    <span class="pref-name">字号</span>
+    <div class="stepper">
+      <button class="ghost" id="t-minus" aria-label="缩小字号">
+        <svg viewBox="0 0 12 12"><path d="M2.5 6h7"/></svg>
+      </button>
+      <output id="font-value">17</output>
+      <button class="ghost" id="t-plus" aria-label="放大字号">
+        <svg viewBox="0 0 12 12"><path d="M2.5 6h7M6 2.5v7"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="pref">
+    <span class="pref-name">正文</span>
+    <div class="seg" id="seg-face" role="radiogroup" aria-label="正文字体">
+      <button data-value="sans" role="radio">黑体</button>
+      <button data-value="serif" role="radio">宋体</button>
+    </div>
+  </div>
+  <div class="pref">
+    <span class="pref-name">外观</span>
+    <div class="seg" id="seg-theme" role="radiogroup" aria-label="深浅色">
+      <button data-value="light" role="radio">浅色</button>
+      <button data-value="dark" role="radio">深色</button>
+    </div>
+  </div>
+  <p class="pref-note">Ctrl+滚轮也能调字号，Ctrl+0 复位。</p>
+</div>
+
+<div id="overlay" class="hidden">
+  <div class="sheet" role="dialog" aria-label="快捷键">
+    <header>
+      <h2>快捷键</h2>
+      <button class="ghost" id="ov-close" aria-label="关闭">
+        <svg viewBox="0 0 12 12"><path d="M3 3l6 6M9 3 3 9"/></svg>
+      </button>
+    </header>
+    <dl class="keys">
+      <dt><kbd>Ctrl</kbd><kbd>O</kbd></dt><dd>打开文件</dd>
+      <dt><kbd>Ctrl</kbd><kbd>R</kbd><span class="or">或</span><kbd>F5</kbd></dt><dd>重新读取</dd>
+      <dt><kbd>Ctrl</kbd><kbd>F</kbd></dt><dd>查找，回车跳到下一个</dd>
+      <dt><kbd>Ctrl</kbd><kbd>T</kbd></dt><dd>翻译选中的文字，没选就翻译全文</dd>
+      <dt><kbd>Ctrl</kbd><kbd>B</kbd></dt><dd>显示或隐藏目录</dd>
+      <dt><kbd>Ctrl</kbd><kbd>D</kbd></dt><dd>切换深色、浅色</dd>
+      <dt><kbd>Ctrl</kbd><kbd>+</kbd><span class="or">/</span><kbd>−</kbd></dt><dd>调整字号，<kbd>Ctrl</kbd><kbd>0</kbd> 复位</dd>
+      <dt><kbd>Ctrl</kbd><kbd>S</kbd></dt><dd>导出成自带样式的网页</dd>
+      <dt><kbd>Ctrl</kbd><kbd>P</kbd></dt><dd>打印或存成 PDF</dd>
+      <dt><kbd>F11</kbd></dt><dd>全屏</dd>
+    </dl>
+    <p class="note">文件在磁盘上改动后会自动重新读取。点标题栏上的文件名，可以看字数、编码和最近打开的文件。</p>
+  </div>
+</div>
+
+<div id="dropzone" class="hidden"><p>松手打开</p></div>
+
+<div id="toasts" aria-live="polite"></div>
+
+<script>/*__HL__*/</script>
+<script>/*__JS__*/</script>
+</body>
+</html>
