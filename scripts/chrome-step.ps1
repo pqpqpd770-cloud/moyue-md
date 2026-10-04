@@ -8,8 +8,10 @@ param(
   [int]$X = -1,
   [int]$Y = -1,
   [string]$Paste = "",
+  [string]$PasteFile = "",
   [string]$Keys = "",
   [switch]$Enter,
+  [switch]$Clear,
   [int]$WaitMs = 1200
 )
 
@@ -57,8 +59,16 @@ if ($X -ge 0 -and $Y -ge 0) {
   Start-Sleep -Milliseconds 300
 }
 
-if ($Paste -ne "") {
-  Set-Clipboard -Value $Paste
+if ($Clear) {
+  # Backspace is layout/selection independent: go to the end, then rub out.
+  Send "{END}"
+  Send ("{BS}" * 40)
+}
+
+$pasteText = $Paste
+if ($PasteFile -ne "") { $pasteText = [System.IO.File]::ReadAllText($PasteFile) }
+if ($pasteText -ne "") {
+  Set-Clipboard -Value $pasteText
   Start-Sleep -Milliseconds 150
   Send "^v"
 }
